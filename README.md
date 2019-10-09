@@ -11,7 +11,9 @@ To run this project:
 > http-server
 
 Once the server is running go to either of these links:
+
 http://127.0.0.1:8080/index.html
+
 http://192.168.1.98:8080/index.html
 
 Choose a sprite name and action name from the drop-downs and click Play!
