@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Hello World</title>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.7.1/pixi.min.js"></script>
+
+<body>
+    <script type="text/javascript">
+        //global vars
+        var characters;
+        var currentCharacter = "knight";
+        var currentAction = 'ATTACKleft'
+        var gResources;
+
+        //load the json
+        function loadJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json")
+            xobj.open('GET', 'characters.json', true) // Replace 'my_data' with the path to your file
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState == 4 && xobj.status == "200") {
+                    // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+                    callback(xobj.responseText);
+                }
+            };
+            xobj.send(null)
+        }
+
+        //Aliases
+        let Application = PIXI.Application,
+            loader = PIXI.loader,
+            resources = PIXI.loader.resources,
+            Sprite = PIXI.Sprite;
+
+        //Create a Pixi Application
+        let app = new Application({ width: 256, height: 256 })
+        app.renderer.backgroundColor = 0xCCCCCC; // same as #CFD8DC
+
+        //Add the canvas that Pixi automatically created for you to the HTML document
+        document.body.appendChild(app.view)
+
+        //Change canvas size
+        app.renderer.autoResize = true
+        app.renderer.resize(512, 480)
+
+        function init() {
+            loadJSON(function (response) {
+                // Parse JSON string into object
+                characters = JSON.parse(response);
+                console.log(characters)
+
+                // import our characters
+                Object.keys(characters).forEach(function (key, index) {
+                    // key: the name of the object key
+                    // index: the ordinal position of the key within the object 
+                    Object.keys(characters[key].actions).forEach(function (key2, index) {
+                        loader.add(characters[key].actions[key2].frames)
+                    })
+                });
+
+                //
+                gResources = resources
+                loader.add('background.png')
+                //
+
+                loader
+                    .load(setup)
+
+                function setup() {
+                    //set background
+                    var texture2 = resources['background.png'].texture;
+
+                    // new sprite
+                    var background = new PIXI.Sprite(texture2);
+
+
+                    background.anchor.x = 0;
+                    background.anchor.y = 0;
+
+                    background.position.x = 0;
+                    background.position.y = 0;
+
+                    app.stage.addChild(background);
+
+                    // create an array of textures from an image path
+                    var frames = [];
+                    var e = document.getElementById("charSelect")
+                    currentCharacter = e.options[e.selectedIndex].value
+                    currentAction = 'ATTACKleft'
+
+                    var imgPath = characters[currentCharacter].actions[currentAction].framesPath
+
+                    //sprites/BONUS-artassets/bonusBOMBeffect/bonusBOMBeffect (1).png
+                    console.log(`${imgPath}${currentCharacter}${currentAction} (1).png`)
+
+                    for (var x = 1; x <= characters[currentCharacter].actions[currentAction].totalFrames; x++) {
+                        frames.push(resources[`${imgPath}${currentCharacter}${currentAction} (${x}).png`].texture)
+                        //frames.push(resources[characters[currentCharacter].actions.ATTACKleft.framesPath + characters[currentCharacter].actions.ATTACKleft.name + ` (${x}).png`]);
+                    }
+
+                    // create an AnimatedSprite (brings back memories from the days of Flash, right ?)
+                    var anim = new PIXI.extras.AnimatedSprite(frames);
+
+                    /*
+                    * An AnimatedSprite inherits all the properties of a PIXI sprite
+                    * so you can change its position, its anchor, mask it, etc
+                    */
+                    anim.x = 100
+                    anim.y = 200
+                    //anim.anchor.set(.65);
+                    anim.animationSpeed = 0.2;
+                    anim.play();
+
+                    app.stage.addChild(anim);
+
+                    // Animate the rotation
+                    app.ticker.add(function () {
+                        //anim.rotation += 0.01;
+                    });
+
+                }
+
+            })
+        }
+
+        function setup2() {
+            // clear the stage
+            var stage = app.stage
+            for (var i = stage.children.length - 1; i >= 0; i--) { stage.removeChild(stage.children[i]); };
+
+            //set background
+            var texture2 = resources['background.png'].texture;
+
+            // new sprite
+            var background = new PIXI.Sprite(texture2);
+
+
+            background.anchor.x = 0;
+            background.anchor.y = 0;
+
+            background.position.x = 0;
+            background.position.y = 0;
+
+            app.stage.addChild(background);
+
+            // create an array of textures from an image path
+            var frames = [];
+            var e = document.getElementById("charSelect")
+            currentCharacter = e.options[e.selectedIndex].value
+            var f = document.getElementById("actSelect")
+            currentAction = f.options[f.selectedIndex].value
+
+            var imgPath = characters[currentCharacter].actions[currentAction].framesPath
+
+            //sprites/BONUS-artassets/bonusBOMBeffect/bonusBOMBeffect (1).png
+            console.log(`${imgPath}${currentCharacter}${currentAction} (1).png`)
+
+            for (var x = 1; x <= characters[currentCharacter].actions[currentAction].totalFrames; x++) {
+                frames.push(resources[`${imgPath}${currentCharacter}${currentAction} (${x}).png`].texture)
+                //frames.push(resources[characters[currentCharacter].actions.ATTACKleft.framesPath + characters[currentCharacter].actions.ATTACKleft.name + ` (${x}).png`]);
+            }
+
+            // create an AnimatedSprite (brings back memories from the days of Flash, right ?)
+            var anim = new PIXI.extras.AnimatedSprite(frames);
+
+            /*
+            * An AnimatedSprite inherits all the properties of a PIXI sprite
+            * so you can change its position, its anchor, mask it, etc
+            */
+            anim.x = 100
+            anim.y = 200
+            //anim.anchor.set(.65);
+            anim.animationSpeed = 0.2;
+            anim.play();
+
+            app.stage.addChild(anim);
+
+            // Animate the rotation
+            app.ticker.add(function () {
+                //anim.rotation += 0.01;
+            });
+
+        }
+
+        // init on load
+        init()
+    </script>
+    <div>
+        <button onclick="setup2()">Play() *tbd</button>
+        <select id="charSelect">
+            <option value="bonus">bonus</option>
+            <option value="gunwoman" >gunwoman</option>
+            <option value="knight">knight</option>
+            <option value="mage">mage</option>
+            <option value="robot" selected>robot</option>
+            <option value="skeleton">skeleton</option>
+            <option value="skeletonarcher">skeletonarcher</option>
+            <option value="skeletonchief">skeletonchief</option>
+            <option value="wolf">wolf</option>
+       </select>
+
+        <select id="actSelect">
+            <option value="ATTACKleft">ATTACKleft</option>
+            <option value="ATTACKright" >ATTACKright</option>
+            <option value="IDLEleft">IDLEleft</option>
+            <option value="IDLEright">IDLEright</option>
+            <option value="IMPACTeffect" selected>IMPACTeffect</option>
+            <option value="PORTRAIT">PORTRAIT</option>
+            <option value="WALKleft">WALKleft</option>
+            <option value="WALKright">WALKright</option>
+       </select>
+
+
+    </div>
+</body>
+
+</html>
